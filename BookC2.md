@@ -90,8 +90,7 @@
   > int i2 = (int)f;
   > ```
   >
-  > 
-
+  
 - 可以在数字中任意位置加下划线
 
 - 加减乘除运算符，8bit/16bit的Numeric Type不能用,(加减等)运算时自动隐式转换成int
@@ -306,3 +305,335 @@ Class1 c;    // Don't need fully qualified name
 1.extern：来自两个assemblies的一个namespace含有两个同名的type
 
 2.Namespace alias qualifiers：内层namespace的names会隐藏外层的names，有时候写全qualified name 也不行，用global::  P80
+
+--------
+
+# Chapter 3 **Creating Types in C#**
+
+## Class
+
+最简形式
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803200852968.png" alt="image-20200803200852968" style="zoom:67%;" />
+
+在class关键词之前，之后和大括号里的关键词:
+
+![image-20200803200908488](D:\Desktop\Grocery\TyporaImageBackUp\image-20200803200908488.png)
+
+
+
+## Fields
+
+e,g,
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803200949463.png" alt="image-20200803200949463" style="zoom:67%;" />
+
+- *readonly* modifier: 阻止一个field在创建后被修改，只能在定义field或者构造函数内assign field
+- Field initialization is optional
+
+## **Methods**
+
+- A method’s signature must be unique within the type. A method’s signature comprises its name and parameter types in order (but not the parameter names, nor the return type).
+
+- Expression-bodied methods:
+
+  ```csharp
+  int Foo (int x) { return x * 2; }
+  int Foo (int x) => x * 2; 
+  ```
+
+  
+
+### Local Method (C# 7.0)
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803201259190.png" alt="image-20200803201259190" style="zoom:67%;" />
+
+> The local method (`Cube`, in this case) is visible only to the enclosing method (WriteCubes)，需要在外层函数调用内层函数
+
+- Local methods can appear inside other function kinds, such as property accessors, constructors
+- The `static` modifier is invalid for local methods. They are implicitly static if the enclosing method is static.
+
+### Constructor
+
+- 没有返回值，名字和enclosing type一样 
+
+- 可以用 expression-bodied members：e.g.
+
+  ```csharp
+  public Panda (string n) => name = n;
+  ```
+
+- **Overloading constructors**:
+
+  - 一个constructor可以call另一个，用`this`关键字，其中price还可以是一个表达式。
+
+    ![image-20200803201556827](D:\Desktop\Grocery\TyporaImageBackUp\image-20200803201556827.png)
+
+- C#自动生成一个无参数的constructor,但是一旦自己定义了constructor,就不自动生成
+
+- Field initializations occur before the constructor is executed, and in the declaration order of the fields.
+
+- constructor不一定是要public的，可以设为不设置为public后用一个类里的static method来生成object，e.g.
+
+  <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803201727024.png" alt="image-20200803201727024" style="zoom:67%;" />
+
+
+
+#### **Deconstructors (C# 7)**
+
+原本给构造函数参数赋值创建对象，此时将赋的值返回
+
+*A deconstruction method must be called Deconstruct, and have one or more out parameters, such as in the following class*
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202023005.png" alt="image-20200803202023005" style="zoom:67%;" />
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202045781.png" alt="image-20200803202045781" style="zoom:67%;" />
+
+第二行相当于：
+
+` rect.Deconstructor ( out var width, out var height );`
+
+### **Object Initializers**
+
+要么用initializers直接给field等赋值，要么用constructor<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202243790.png" alt="image-20200803202243790" style="zoom:67%;" />
+
+### **The `this` Reference**
+
+1.用来引用这个对象本身：P88底
+
+2.用来避免参数和自身的properties/field同名   
+
+## **Properties**
+
+`get`/`set`作为properties accessors，有一个隐含的参数value
+
+### **Expression-bodied properties (C# 6, C# 7)**
+
+e.g.1 一个readonly Property(相当于只有get)
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202456693.png" alt="image-20200803202456693" style="zoom:67%;" />
+
+e.g.2 一个既可以读又可以写的property
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202510077.png" alt="image-20200803202510077" style="zoom:67%;" />
+
+>  自动属性：相当于在field后面加{get;set}
+
+### **Property initializers (C# 6)**
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202603731.png" alt="image-20200803202603731" style="zoom:67%;" />
+
+> 可以只含get，这样相当于创建了一个immutable (read-only) types
+
+### **get and set accessibility**
+
+get和set可以有不同的accessibility
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803202645515.png" alt="image-20200803202645515" style="zoom:67%;" />
+
+## **Indexers**
+
+像string有indexers可以访问里面的每个char，通常用来访问一个class/type里面的list/dictionary value.
+
+To write an indexer, define a property called **this**, specifying the arguments in square brackets. For instance:参数列表用方括号而不像普通的函数一样用圆括号
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803210559205.png" alt="image-20200803210559205" style="zoom:67%;" />
+
+如果不用set只要获取,可以用expression-body syntax
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803210628848.png" alt="image-20200803210628848" style="zoom:67%;" />
+
+## **Constants:P93**
+
+是一个static field，值永远不会变
+
+A constant is declared with the `const` keyword and must be initialized with a value.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803210704601.png" alt="image-20200803210704601" style="zoom:50%;" />
+
+Constants can also be declared local to a method.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200803210749402.png" alt="image-20200803210749402" style="zoom:50%;" />
+
+## **Static Constructors**
+
+1.A static constructor executes once per type, rather than once per instance. A type can define only one static constructor, and it must be parameterless and have the same name as the type
+
+2.触发static constructor:实例化这个type/访问这个type里面的静态成员
+
+3.如果有静态field initializer, Static field initializers run just before the static constructor is called
+
+## **Static Classes**
+
+静态类只能含有静态成员，例如 System.Console and System.Math class
+
+## **Finalizers**
+
+1.Finalizers are class-only methods that execute before the garbage collector reclaims the memory for an unreferenced object. The syntax for a finalizer is the name of the class prefixed with the ~ symbol:
+
+2.From C# 7, single-statement finalizers can be written with expression-bodied syntax:
+
+`~Class1() => Console.WriteLine ("Finalizing");`
+
+## **Partial Types and Methods:P96**
+
+1. allow type definition to be split — typically across multiple files.*A common scenario is for a partial class to be auto-generated from some other source (such as a Visual Studio template or designer), and for that class to be augmented with additional hand-authored methods.* For example:
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804213442338.png" alt="image-20200804213442338" style="zoom:67%;" />
+
+2. 每个partial type's participant must have the partial declaration ，下面的是**错误**的：
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804213501559.png" alt="image-20200804213501559" style="zoom:67%;" />
+
+3. Participants cannot have conflicting members. e.g. A constructor with the same parameters
+
+4. each participant can independently specify interfaces to implement.5.The compiler makes no guarantees with regard to field initialization order between partial type declarations. 
+
+### **Partial methods**
+
+Partial methods must be **void** and are implicitly **private**.
+
+**一般用在一部分是自动生成的，一部分是手写的情况**
+
+**1.含两部分：definition, implemention**
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804213633804.png" alt="image-20200804213633804" style="zoom:67%;" />
+
+## **Polymorphism**
+
+1. This means a variable of type x can refer to an object that subclasses x.
+2. 一个方法的参数是父类，可以传给他子类，参数是子类传给他父类不行(subclass is more compotent, can be used in scenarios require the less compotent one)
+
+### **Casting and Reference Conversions**
+
+an object reference can be 隐式转换成一个父类（**up cast**)，Explicitly **downcast** to a subclass reference
+
+#### **Upcasting**
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804213833215.png" alt="image-20200804213833215" style="zoom:67%;" />
+
+`Console.WriteLine (a == msft);    // True`
+
+尽管引用a指向(引用)了一个子类对象，不能完全当成子类来用，因为a的reference type是父类,即使指向的object是子类，只能当作父类来用，但是可以之后成功的downcast:
+
+e.g.
+
+![image-20200804214018187](D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214018187.png)
+
+#### **Downcasting**
+
+A downcast operation **creates a subclass reference** **from a base class reference**. 
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214044352.png" alt="image-20200804214044352" style="zoom:67%;" />
+
+子类的引用赋值给父类的引用，然后再downcast给另一个子类引用不可以。即Donwcast要求原先是那个子类，被upcast到父类之后可以downcast回来 
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214110132.png" alt="image-20200804214110132" style="zoom:67%;" />
+
+> 其中第四行输出为默认初始值0
+
+If a downcast fails, an InvalidCastException is thrown
+
+#### **The `as` operator**
+
+The `as` operator performs a downcast that evaluates to **null** (rather than throwing an exception) if the downcast fails.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214240884.png" alt="image-20200804214240884" style="zoom:67%;" />
+
+#### **The `is` operator**
+
+The `is` operator **tests whether a reference conversion would succeed**; in other words, whether an object derives from a specified class (or implements an interface). It is often used to test before downcasting.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214348339.png" alt="image-20200804214348339" style="zoom:67%;" />
+
+##### **The `is` operator and pattern variables (C# 7):P100**
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214426191.png" alt="image-20200804214426191" style="zoom:67%;" />
+
+#### **Virtual Function Members**
+
+- 定义格式如public virtual decimal xxx,定义了可以被子类用override 关键词改写，用来实现更加具体的功能。改写了之后不仅子类的这个成员值改变，其被upcast之后的指向父类的引用的这个值也改变
+
+- Methods, properties, indexers, and events can all be declared, Field can not 
+
+- The signatures, return types, and accessibility of the virtual and overridden methods must be identical. An overridden method can call its base class implementation via the `base `keyword
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804214603992.png" alt="image-20200804214603992" style="zoom:67%;" />
+
+#### **Abstract Classes and Abstract Members**
+
+1. 可以定义抽象类，只有抽象类里可以定义抽象成员(一般的类不能包含抽象方法等)，只有这些抽象成员都被override之后这个类才可以被实例化。（抽象类里只可以定义抽象函数，属性等可以是非抽象的，但是也可以被override。)Abstract members are like virtualmembers, except they don’t provide a default implementation.
+
+2. abstract methods have no actual code in them, and subclasses HAVE TO override the method. Virtual methods can have code, which is usually a default implementation of something, and any subclasses CAN override the method using the override modifier and provide a custom implementation.
+
+#### **Hiding Inherited Members(`new` keyword)**
+
+1. B是A的子类，A,B类里面有一样的成员C则：References to A (at compile time) bind to A.C References to B (at compile time) bind to B.C编译器会产生一个warning，可以用new关键词suppress warning
+
+2. new vresus overried:P102底当一个override的对象up cast到父类的时候，这个对象实现的是override之后的功能，当一个new 对象upcast到父类的时候，这个对象实现的是之前父类里的功能。
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804215148482.png" alt="image-20200804215148482" style="zoom:67%;" />
+
+#### **Sealing Functions and Classes**
+
+1. 可以seal一个方法，seal一个类(seal类里的所有virtual function),In our earlier virtual function member example, we could have sealed `House`’s implementation of `Liability`, preventing a class that derives from `House` from overriding `Liability`, as follows:
+
+   `public sealed override decimal Liability { get { return Mortgage; } }`
+
+2. Although you can seal against overriding, you can’t seal a member against being hidden.
+
+#### **The `base` Keyword**
+
+1. Accessing an overridden function member from the subclass.
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804215611249.png" alt="image-20200804215611249" style="zoom:67%;" />
+
+   > 现在访问的就不是被virtual过的，父类的`Liability`属性，同样也可以用来访问被hidden(用new)的成员，但是被new的成员也可以用直接cast到父类的方法来访问
+
+2. 可以用来Calling a base-class constructor.
+
+#### **Constructors and Inheritance**
+
+**如果子类没写constructor,不会自动继承父类的constructor，父类的无参构造函数总是默认被调用**
+
+1. 父类的构造方法不自动被继承，可以用base来访问
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804215928748.png" alt="image-20200804215928748" style="zoom:67%;" />
+
+> Base-class constructors always execute first; this ensures that *base* initialization occurs before*specialized* initialization.
+
+2. If a constructor in a subclass omits the base keyword, the base type’s parameterless constructor is implicitly called
+
+   e.g.
+
+   ![image-20200804220050297](D:\Desktop\Grocery\TyporaImageBackUp\image-20200804220050297.png)
+
+
+
+##### **Constructor and field initialization order**
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804220123927.png" alt="image-20200804220123927" style="zoom:67%;" />
+
+子类class D构造函数接收到一个参数x时，调用父类的构造函数，把x+1作为参数。
+
+#### **Overloading and Resolution：P106**
+
+两个函数同名且一个的参数是另一个的子类，When an overload is called, the most specific type has precedence
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804222528465.png" alt="image-20200804222528465" style="zoom:67%;" />

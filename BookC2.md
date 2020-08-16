@@ -566,9 +566,9 @@ The `is` operator **tests whether a reference conversion would succeed**; in oth
 
 - 定义格式如public virtual decimal xxx,定义了可以被子类用override 关键词改写，用来实现更加具体的功能。改写了之后不仅子类的这个成员值改变，其被upcast之后的指向父类的引用的这个值也改变
 
-- Methods, properties, indexers, and events can all be declared, Field can not 
+- **Methods**, **properties**, **indexers**, and **events** can all be declared, **Field** can not 
 
-- The signatures, return types, and accessibility of the virtual and overridden methods must be identical. An overridden method can call its base class implementation via the `base `keyword
+- The **signatures**, **return types**, and **accessibility** of the virtual and overridden methods must be identical. An overridden method can call its base class implementation via the `base `keyword
 
 e.g.
 
@@ -576,7 +576,7 @@ e.g.
 
 #### **Abstract Classes and Abstract Members**
 
-1. 可以定义抽象类，只有抽象类里可以定义抽象成员(一般的类不能包含抽象方法等)，只有这些抽象成员都被override之后这个类才可以被实例化。（抽象类里只可以定义抽象函数，属性等可以是非抽象的，但是也可以被override。)Abstract members are like virtualmembers, except they don’t provide a default implementation.
+1. 可以定义抽象类，只有抽象类里可以定义抽象成员(一般的类不能包含抽象方法等)，只有这些抽象成员都被override之后这个类才可以被实例化。（抽象类里只可以定义抽象函数，属性等可以是非抽象的，但是也可以被override). **Abstract members are like virtualmembers, except they don’t provide a default implementation.**
 
 2. abstract methods have no actual code in them, and subclasses HAVE TO override the method. Virtual methods can have code, which is usually a default implementation of something, and any subclasses CAN override the method using the override modifier and provide a custom implementation.
 
@@ -637,3 +637,116 @@ e.g.
 e.g.
 
 <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200804222528465.png" alt="image-20200804222528465" style="zoom:67%;" />
+
+### The object Type
+
+1. object (System.Object) is the ultimate base class for all types. Any type can be upcast to object.
+
+2. 可以用object写个stack类，里面有push,pop等方法，so we can Push and Pop instances of any type to and from the Stack
+
+   e.g.
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816220842030.png" alt="image-20200816220842030"  />
+
+3. 尽管object是个引用类型，C# value types, such as **int**, can also be cast to and from object, and so be added to our stack. This feature of C# is called type unification and is demonstrated here:
+
+   ```csharp
+   stack.Push(3);
+   int three = (int) stack.Pop();
+   ```
+
+   
+
+#### **Boxing and Unboxing**
+
+1. Boxing将一个值类型转换成引用类型（一个object class or an interface）：
+
+   ```csharp
+   int x = 9;
+   object obj =x; //box the int.
+   ```
+
+   
+
+2. Unboxing reverses the operation, by casting the object back to the original value type:
+
+   ```csharp
+   int y = (int)obj;     //unbox the int.
+   ```
+
+   
+
+3. unboxing时， Runtime检查这个值是不是正确的类型（上面例子中括号内的int为被检查的值，合格obj本身就是指向int 类型，则正确）错误例子：
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221318416.png" alt="image-20200816221318416" style="zoom:80%;" />
+
+   此时括号内的long被检查，不匹配真正的值，报 InvalidCastException
+
+   正确例子：
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221341911.png" alt="image-20200816221341911" style="zoom:67%;" />
+
+4. ![image-20200816221359368](D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221359368.png)
+
+
+
+##### **Copying semantics of boxing and unboxing**
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221456798.png" alt="image-20200816221456798" style="zoom:80%;" />
+
+#### **Static and Runtime Type Checkin**
+
+1. 静态检查错误：Static type checking enables the compiler to verify the correctness of your program without running it. The following code will fail because the compiler enforces static typing:
+
+   `int x = "5";`
+
+2. Runtime检查错误：Runtime type checking is performed by the CLR when you downcast via a reference conversion or unboxing. For example:
+
+   ```csharp
+   object y = "5"; 
+   int z = (int) y;          // Runtime error, downcast failed
+   ```
+
+   
+
+#### **The GetType Method and typeof Operator**
+
+1. All types in C# are represented at runtime with an instance of System.Type. There are two basic ways to get a `System.Type` object:
+   - `Call `GetType` on the instance.
+   - Use the `typeof` operator on a type name.
+
+2. System.Type有许多属性，例如 type’s name, assembly, base type, and so on.
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221810597.png" alt="image-20200816221810597"  />
+
+   
+
+#### **The `ToString` Method**
+
+1. The ToString method returns the default textual representation of a type instance
+
+2. 可以在custome types里面override ToString方法，如果不override,则返回type name
+
+#### **Object Member Listing**
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816221914081.png" alt="image-20200816221914081" style="zoom: 67%;" />
+
+### **Structs**
+
+1. struct和class类似，区别：
+   - struct是值类型
+   - struct不支持继承
+   - A struct can have all the members a class can, **except** the following:
+     -  A parameterless constructor
+     - Field initializers 
+     - A finalizer
+     - Virtual or protected members
+
+#### **Struct Construction Semantics**
+
+1. struct有一个隐含的无参构造函数不能被override，所有的field自动被赋值为二进制0
+2. 如果写了一个构造函数，必须把所有field赋值
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816222117102.png" alt="image-20200816222117102" style="zoom:80%;" />
+
+### **Access Modifiers**

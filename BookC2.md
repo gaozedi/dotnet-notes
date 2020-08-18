@@ -750,3 +750,125 @@ e.g.
 <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200816222117102.png" alt="image-20200816222117102" style="zoom:80%;" />
 
 ### **Access Modifiers**
+
+- *`public`* Fully accessible. This is the implicit accessibility for members of an enum or interface. 
+
+- *`internal`* Accessible only within the containing assembly or friend assemblies. This is the default accessibility for non-nested types. 
+
+  > **N.B.**  Nested type, in C#, is a type declared within an existing class or struct. Unlike a non-nested type, which is declared directly within a compilation unit or a namespace 
+  >
+  > An assembly is (in general) a single .dll or .exe file. A C# project (in general) compiles to a single assembly.
+
+- *`private`* Accessible only within the containing type. This is the default accessibility for members of a class or struct. 
+
+- *`protected`* Accessible only within the containing type or subclasses. 
+
+- *`protected internal`* The union of `protected` and `internal` accessibility. Eric Lippert explains it as follows: *Everything is as private as possible by default, and each modifier makes the thing more accessible.*
+
+  So something that is protected internal is made more accessible in two ways.
+
+- >    **Examples:P111**   
+  >
+  > **Friend Assemblies:P111 bottom,standby**
+
+#### **Accessibility Capping**
+
+类访问不到，类里的成员哪怕是public也访问不到
+
+#### **Restrictions on Access Modifiers**
+
+1. A subclass itself can be less accessible than a base class, but not more
+
+2. When overriding a base class function, accessibility must be identical on the overridden function.
+
+   ![image-20200818215537077](D:\Desktop\Grocery\TyporaImageBackUp\image-20200818215537077.png)
+
+
+
+### **Interfaces**
+
+An interface is similar to a class, but it provides a **specification** rather than an **implementation** for its members. An interface is special in the following ways:
+
+1. Interface members are all implicitly **abstract**.
+
+2. Interface members are always implicitly **public** and cannot declare an access modifier.
+
+3. A class (or struct) can implement multiple interfaces.
+
+4. An interface can contain only methods, properties, events, and indexers, which noncoincidentally are precisely the members of a class that can be abstract.(cannot have a field,nor a default value for the property)
+
+5. 实现接口的时候要用public
+
+6. <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200818215717032.png" alt="image-20200818215717032" style="zoom:67%;" />
+
+   > Implementing an interface means providing a public implementation for all its members，其中第一行相当于用子类的对象建了一个Interface(相当于父类）的引用（up cast），type是父类，**和类的继承不同**，此处可以直接使用Interface(相当于父类)type的引用访问子类(implement class)的成员。
+   >
+   > 和抽象类类似，如果父类有abstract方法，子类实现这个方法，从子类对象创建父类对象的引用，
+   >
+   > Implicitly cast 一个类到被这个类实现的interface, 可以访问实现过的那些成员（interface中定义的那些），不能访问类里不是实现interface的成员
+
+#### **Extending an Interface**
+
+![image-20200818220503648](D:\Desktop\Grocery\TyporaImageBackUp\image-20200818220503648.png)
+
+> interface can derived from more than one other interface.   
+
+#### Explicit Interface Implementation
+
+1. explict implementation无需使用public关键字
+
+   ![image-20200818220613234](D:\Desktop\Grocery\TyporaImageBackUp\image-20200818220613234.png)
+
+
+
+#### **Implementing Interface Members Virtually**
+
+1. 默认被implemented的Interface成员是sealed的，如果在implement的时候标记为virtual则可以被override
+
+2. 如果在子类override了父类实现接口的方法，通过子类，父类，接口来访问这个方法都用子类的实现：
+
+   ![image-20200818220728959](D:\Desktop\Grocery\TyporaImageBackUp\image-20200818220728959.png)
+
+3. An explicitly implemented interface member cannot be marked virtual,nor can it be overridden in the usual manner. It can, however, be reimplemented.
+
+#### **Reimplementing an Interface in a Subclass p115**
+
+1. e.g.用了接口名加点的explicitly implement，所以不能标记为virtual，所以子类重新实现这个接口来变相的override
+
+   ![image-20200818220921538](D:\Desktop\Grocery\TyporaImageBackUp\image-20200818220921538.png)
+
+2. Calling the reimplemented member through the interface calls the subclass’s implementation:
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200818220952881.png" alt="image-20200818220952881" style="zoom: 67%;" />
+
+3. 子类reimplement父类已经实现过的 interface, 无论父类实现这个接口的时候是否是virtual的，无论父类是不是显式实现的接口，实例化一个子类对象，把这个子类对象cast到接口调用的是子类的实现，把这个对象cast到父类还是父类的实现。
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200818221050994.png" alt="image-20200818221050994" style="zoom:67%;" />
+
+   调用时：Calling the reimplemented member through the interface calls the subclass’s implementation
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200818221129545.png" alt="image-20200818221129545" style="zoom:67%;" />
+
+
+
+##### **Alternatives to interface reimplementation** p116
+
+#### **Interfaces and Boxing**
+
+e.g.第一种情况为调用一个implicitly implemented member on a struct( not causes boxing)第二种情况为Converting a struct to an interface( causes boxing)
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200818221231900.png" alt="image-20200818221231900" style="zoom:67%;" />
+
+#### Summary for Interface
+
+**WRITING A CLASS VERSUS AN INTERFACE:p117**As a guideline: Use classes and subclasses for types that naturally share an implementation. Use interfaces for types that have independent implementations.
+
+子类new了父类的方法(子类父类方法同名)，子类对象cast到父类时是父类的实现
+
+父类是方法是virtual，子类方法override了父类的方法，子类对象cast到父类时调用的是子类的实现
+
+父类方法是抽象方法，子类继承父类并实现(override)父类的抽象方法，子类对象cast到父类时调用的是子类的实现，父类不可被实例化.
+
+"父类"是一个接口，子类实现这个接口里的方法，子类对象cast到接口的时候实现的是子类的实现。
+
+### **Enums**

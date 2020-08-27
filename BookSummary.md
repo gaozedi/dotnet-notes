@@ -872,3 +872,246 @@ e.g.第一种情况为调用一个implicitly implemented member on a struct( not
 "父类"是一个接口，子类实现这个接口里的方法，子类对象cast到接口的时候实现的是子类的实现。
 
 ### **Enums**
+
+e,g,
+
+```csharp
+public enum BorderSide { Left, Right, Top, Bottom }
+```
+
+1. 值类型
+
+2. Each enum member has an underlying integral value，默认是从0开始递增的int型
+
+3. You may specify an alternative integral type, as follows:
+
+   `public enum BorderSide : byte { Left, Right, Top, Bottom }`
+
+4. 可以自己指定一部分或者全部underlying value，可以自己specify an alternative integral type
+
+   e.g.
+
+   `public enum BorderSide : byte { Left=1, Right=2, Top=10, Bottom=11 }`
+
+   相当于
+
+   `public enum BorderSide : byte { Left=1, Right, Top=10, Bottom }`
+
+#### **Enum Conversions**
+
+1. enum instance和相互转换(都需要explict cast)：
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820204556145.png" alt="image-20200820204556145" style="zoom:50%;" />
+
+2. 一个enum里可以包含另一个enum
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820204703402.png" alt="image-20200820204703402" style="zoom:67%;" />
+
+3. A translation between the enum types uses the underlying integral values
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820204738217.png" alt="image-20200820204738217" style="zoom:80%;" />
+
+4. 将0 cast为enum type不需要explict cast
+
+   `BorderSide b = 0;  // No cast required`
+
+#### **Flags Enums：p118底**
+
+1. 新建一个enum对象含有两个以上enum成员
+
+2. https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/enumeration-types
+
+3. e.g.
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820204911820.png" alt="image-20200820204911820" style="zoom: 50%;" />
+
+4. For convenience, you can include combination members within an enum declaration itself
+
+   <img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820204957260.png" alt="image-20200820204957260" style="zoom:50%;" />
+
+   > 其中TopBottom的underlying 数字是4+8=12
+
+
+
+**Enum Operators:p119**
+**Type-Safety Issues:p120**
+
+### **Nested Types**
+
+A nested type is declared within the scope of another type. For example:
+
+```csharp
+public class TopLevel
+{  
+    public class Nested { }               // Nested class  
+    public enum Color { Red, Blue, Tan }  // Nested enum 
+}
+```
+
+1. N.B static 用类名访问，方法里才能访问field
+
+2. 可以访问外层类的private等对象，不能访问另一个nest在外层类的类（等）的private member
+
+3. The default accessibility for a nested type is private rather than internal.
+
+4. Accessing a nested type from outside the enclosing type requires qualification with the enclosing type’s name (like when accessing static members).
+
+   For example, to access `Color.Red` from outside our `TopLevel` class, we’d have to do this:
+
+   `TopLevel.Color color = TopLevel.Color.Red;`
+
+5. It can be declared with the full range of access modifiers, rather than just public and internal.
+
+### **Generics**
+
+#### **Generic Types**
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820205539936.png" alt="image-20200820205539936" style="zoom:67%;" />
+
+> `Stack<T>` called open type, whereas `Stack<int>` is a closed type,At runtime, all generic type instances are closed.
+
+#### **Why Generics Exist：p123**
+
+如果用object 和强制转换代替generics, 需要boxing和downcasting，如果发生downcast错误并且只能在runtime的时候发生,compile 会通过
+
+#### **Generic Methods**
+
+e.g.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820205650192.png" alt="image-20200820205650192" style="zoom:67%;" />
+
+when calling, the compiler will automatically infer the argument type.
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200820205708133.png" alt="image-20200820205708133" style="zoom: 80%;" />
+
+**equal to this**
+
+`Swap<int> (ref x, ref y);`
+
+在generic type里的method不是generic method，例如前面的generic class stack里的`pop`，unless it introduces type parameters (with the angle bracket syntax). The Pop method in our generic stack merely uses the type’s existing type parameter, `T`, and is not classed as a generic method.
+
+
+
+#### **Declaring Type Parameters**
+
+1. Type parameters can be introduced in the declaration of classes, structs, interfaces, delegates  and methods. Other constructs, such as **Properties**, **indexers**, **events**, **fields**, **constructors**, **operators**, cannot introduce a type parameter, but can use one
+
+   For example, the property `Value` uses `T`:
+
+   ```csharp
+   public struct Nullable<T>
+   {
+   public T Value { get; }
+   }
+   ```
+
+   we could write an indexer that returns a generic item:
+
+   `public T this [int index] => data [index];       //legal`
+
+   Similarly, constructors can partake in existing type parameters, but not introduce them:
+
+   `public Stack<T>() { }                      // Illegal,it's a constructor`
+
+2. A generic type or method can have multiple parameters. For example:
+
+   `class Dictionary<TKey, TValue> {...}`
+
+   > 只有一个generic parameter的时候用T，多个的时候指定T什么
+
+   To instantiate:
+
+   `Dictionary<int,string> myDic = new Dictionary<int,string>(); `
+
+   or:
+
+   `var myDic = new Dictionary<int,string>();`
+
+   Generic type names and method names can be overloaded as long as the number of type parameters is different. For example, the following three type names do not conflict:
+
+   ```csharp
+   class A        {} 
+   class A<T>     {} 
+   class A<T1,T2> {}
+   ```
+
+   
+
+#### **typeof and Unbound Generic Types:p125**
+
+##### **The default Generic Value**
+
+The default keyword can be used to get the default value for a generic type parameter. The default value for a reference type is null, and the default value for a value type is the result of bitwise-zeroing the value type’s fields:
+
+```csharp
+static void Zap<T> (T[] array) 
+{  
+for (int i = 0; i < array.Length; i++)    
+    array[i] = default(T); 
+}
+```
+
+##### **Generic Constraints:p126**
+
+1.默认type parameter可以被任意类型替换，可以用where限制
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200827215604179.png" alt="image-20200827215604179" style="zoom:67%;" />
+
+2.In the following example, `GenericClass<T,U>` requires `T` to derive from (or be identical to) `SomeClass` and implement `Interface1`, and requires `U` to provide a parameterless constructor:
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200827215635738.png" alt="image-20200827215635738" style="zoom:67%;" />
+
+A **base-class constraint** specifies that the type parameter must subclass (or match) a particular class; 
+
+an **interface constraint** specifies that the type parameter must implement that interface. *These constraints allow instances of the type parameter to be implicitly converted to that class or interface.* For example, suppose we want to write a generic Max method, which returns the maximum of two values. We can take advantage of the generic interface defined in the framework called 
+
+`IComparable<T>`:
+
+```csharp
+public interface IComparable<T>   
+{  
+     int CompareTo (T other); 
+} 
+```
+
+`CompareTo` returns a positive number if this is greater than other. Using this interface as a constraint, we can write a `Max` method as follows (to avoid distraction, null checking is omitted):
+
+```csharp
+static T Max <T> (T a, T b) where T : IComparable<T> 
+{  
+return a.CompareTo (b) > 0 ? a : b; 
+}
+```
+
+The `Max` method can accept arguments of any type implementing `IComparable<T>` (which includes most built-in types such as int and string):
+
+```csharp
+int z = Max (5, 10);               // 10 
+string last = Max ("ant", "zoo");  // zoo 
+```
+
+The **class constraint and struct constraint** specify that T must be a reference type or (nonnullable) value type. A great example of the struct constraint is the `System.Nullable<T>` struct (we will discuss this class in depth in “Nullable Types” in Chapter 4):
+
+`struct Nullable<T> where T : struct {...} `
+
+The **parameterless constructor** constraint requires T to have a public parameterless constructor. If this constraint is defined, *you can call `new() `on `T`*:
+
+```csharp
+static void Initialize<T> (T[] array) where T : new() {  
+for (int i = 0; i < array.Length; i++)    
+    array[i] = new T(); } 
+```
+
+The **naked type constraint** requires one type parameter to derive from (or match) another type parameter. (即需要和另一个泛型一样或者是子类）In this example, the method `FilteredStack` returns another `Stack`, containing only the subset of elements where the type parameter `U` is of the type parameter `T`:
+
+```csharp
+class Stack<T> {  
+    Stack<U> FilteredStack<U>() where U : T {...} 
+    }
+```
+
+#### **Subclassing Generic Types**
+
+<img src="D:\Desktop\Grocery\TyporaImageBackUp\image-20200827220515088.png" alt="image-20200827220515088" style="zoom:80%;" />
